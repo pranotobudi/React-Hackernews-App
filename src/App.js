@@ -31,10 +31,14 @@ class Excel extends Component{
       sortby: 0,
       ascending: true,
       edit: {row:null, col:null},
+      isSearch: false,
     };
+    this.preSearchData = null;
     this.onHandleClickSort = this.onHandleClickSort.bind(this);
     this.handleDoubleClickEdit=this.handleDoubleClickEdit.bind(this);
-    this.handleSubmitSave = this.handleSubmitSave.bind(this)
+    this.handleSubmitSave = this.handleSubmitSave.bind(this);
+    this.handleOnChangeSearch = this.handleOnChangeSearch.bind(this);
+    this.handleOnClickSearch = this.handleOnClickSearch.bind(this);
   }
 
   onHandleClickSort(e){
@@ -118,70 +122,136 @@ class Excel extends Component{
         data: new_data,
         edit:{row:null, col:null}
       });
+  }
+
+  handleOnChangeSearch(e){
+    
+    let searchText = e.target.value.toLowerCase();
+    let cellIdx = e.target.dataset.idx;
+    // console.log("cellIdx: "+cellIdx);
+    console.log("searchText:" + searchText);
+    console.log("preSearchData:" + this.preSearchData);
+    let searchResultData = this.preSearchData.filter((dataInRow) => {
+      // console.log("dataInRow: "+dataInRow);
+      // console.log("dataInRow[cellIdx]: "+dataInRow[cellIdx]);
+      console.log(dataInRow[cellIdx].toLowerCase().includes(searchText));
+      return dataInRow[cellIdx].toLowerCase().includes(searchText);
+    });
+    this.setState(
+      {data: searchResultData}
+    );
+  }
+
+  handleOnClickSearch(e){
+    if(this.state.isSearch){
+      /* search button clicked: on to off */
+      this.setState({isSearch:false});
+    }else{
+      this.setState({isSearch:true});
+      this.preSearchData = this.state.data;
+    }
 
   }
 
   componentDidMount() {
     console.log('I was triggered during componentDidMount')
   }
+
+  renderToolbar(){
+    return(
+      <button onClick={this.handleOnClickSearch}>Search</button>
+    );
+  }
+
+  renderSearch(){
+    if(!this.state.isSearch){
+      return null;
+    }
+    return(
+      <tr>
+        {
+          this.state.headers.map((_notUsed,idx) => {
+            return(
+              <td key={idx}>
+                <input data-idx={idx} onChange={this.handleOnChangeSearch}/>
+              </td>
+            );
+          })
+        }        
+      </tr>
+    );
+  }
+
+  renderContent(){
+    return(
+        this.state.data.map((row, rowIdx) => {     
+          return(
+            <tr key={row.toString()} >
+              {
+                row.map((item, colIdx) => {
+                  let isEdit = (this.state.edit.row === rowIdx) && (this.state.edit.col === colIdx);
+                  return(
+                    <td key={colIdx} data-column={colIdx} data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>
+                      {isEdit?(
+                          <form onSubmit={this.handleSubmitSave}>
+                            <input type="text" defaultValue={item}/>
+                          </form>
+                        ):(
+                          item
+                        )
+                      }
+                    </td>
+                  );
+                })
+              }
+              
+              
+                {/* <td data-column='0' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[0]}</td>
+                <td data-column='1' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[1]}</td>
+                <td data-column='2' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[2]}</td>
+                <td data-column='3' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[3]}</td>
+                <td data-column='4' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[4]}</td>  */}
+              
+            
+            </tr>
+          );
+      })        
+      
+    );
+  }
+
+  renderTable(){
+    return(
+      <table>
+      <thead onClick={this.onHandleClickSort}>
+        <tr >
+          {console.log(this.state.headers)}
+          {
+              this.state.headers.map((item) => {
+              return(
+                <th key={item.toString()} >
+                    {item}
+                </th>        
+              );
+            })
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {this.renderSearch()}
+        {this.renderContent()}
+      </tbody>
+    </table>
+    );
+  }
+
   render(){
     console.log('I was triggered during render')
     return(
-      <table>
-        {/* <thead onClick={this.onHandleClick}> */}
-        <thead onClick={this.onHandleClickSort}>
-          <tr >
-            {console.log(this.state.headers)}
-            {
-                this.state.headers.map((item) => {
-                return(
-                  <th key={item.toString()} >
-                      {item}
-                  </th>        
-                );
-              })
-            }
-          </tr>
-        </thead>
-        <tbody>
-          {
-              this.state.data.map((row, rowIdx) => {
-                  
-                  return(
-                    <tr key={row.toString()} >
-                      {
-                        row.map((item, colIdx) => {
-                          let isEdit = (this.state.edit.row===rowIdx) && (this.state.edit.col ===colIdx);
-                          return(
-                            <td key={colIdx} data-column={colIdx} data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>
-                              {isEdit?(
-                                  <form onSubmit={this.handleSubmitSave}>
-                                    <input type="text" defaultValue={item}/>
-                                  </form>
-                                ):(
-                                  item
-                                )
-                              }
-                            </td>
-                          );
-                        })
-                      }
-                      
-                      
-                        {/* <td data-column='0' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[0]}</td>
-                        <td data-column='1' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[1]}</td>
-                        <td data-column='2' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[2]}</td>
-                        <td data-column='3' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[3]}</td>
-                        <td data-column='4' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[4]}</td>  */}
-                      
-                    
-                    </tr>
-                  );
-              })
-          }
-
-        </tbody>
-      </table>
+      <div>
+        {this.renderToolbar()}
+        {this.renderTable()}
+      </div>
     );
   }
 }
