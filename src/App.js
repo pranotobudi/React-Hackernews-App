@@ -39,6 +39,7 @@ class Excel extends Component{
     this.handleSubmitSave = this.handleSubmitSave.bind(this);
     this.handleOnChangeSearch = this.handleOnChangeSearch.bind(this);
     this.handleOnClickSearch = this.handleOnClickSearch.bind(this);
+    this.handleOnClickDownload = this.handleOnClickDownload.bind(this, 'json');
   }
 
   onHandleClickSort(e){
@@ -153,13 +154,43 @@ class Excel extends Component{
 
   }
 
+  handleOnClickDownload(format, e){ 
+    console.log('test')
+    // let contents = JSON.stringify(this.state.data);
+    // let URL = window.URL || window.webkitURL;
+    // let blob = new Blob([contents], {type: 'text/' + format});
+    // e.target.href = URL.createObjectURL(blob);
+    // e.target.download = 'data.' + format;
+
+    let filename = "export.json";
+    let contentType = "application/json;charset=utf-8;";
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      var blob = new Blob([decodeURIComponent(encodeURI(JSON.stringify(this.state.data)))], { type: contentType });
+      navigator.msSaveOrOpenBlob(blob, filename);
+    }else {
+      var a = document.createElement('a');
+      a.download = filename;
+      a.href = 'data:' + contentType + ',' + encodeURIComponent(JSON.stringify(this.state.data));
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+ 
+
+  }
+
   componentDidMount() {
     console.log('I was triggered during componentDidMount')
   }
 
   renderToolbar(){
     return(
+      <div>
       <button onClick={this.handleOnClickSearch}>Search</button>
+      <button onClick={this.handleOnClickDownload}>Download JSON</button>
+      </div>
+      
     );
   }
 
