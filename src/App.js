@@ -29,13 +29,15 @@ class Excel extends Component{
       headers: this.props.headers,
       data: this.props.data,
       sortby: 0,
-      ascending: true
+      ascending: true,
+      edit: {row:null, col:null},
     };
-    this.onHandleClick = this.onHandleClick.bind(this);
-
+    this.onHandleClickSort = this.onHandleClickSort.bind(this);
+    this.handleDoubleClickEdit=this.handleDoubleClickEdit.bind(this);
+    this.handleSubmitSave = this.handleSubmitSave.bind(this)
   }
 
-  onHandleClick(param, e){
+  onHandleClickSort(e){
     var columnClicked = e.target.cellIndex;
     //var column = e.target;
     let data = this.state.data
@@ -63,7 +65,7 @@ class Excel extends Component{
         item = item.replace('\u2193','');
 
           if (columnClicked === idx){
-          item += current_ascending?' \u2191':' \u2193'; 
+          item += current_ascending?' \u2193':' \u2191'; 
           }
         console.log(item + " idx: " + idx)
         return item;
@@ -78,13 +80,47 @@ class Excel extends Component{
         sortby: columnClicked,
         ascending: current_ascending,
       }
-    );
-
-
-    
-    // this.setState({headers: ["book"]})
-    // console.log("clicked"+column+" event: "+e+" param: "+param);
+    );    
   }
+
+  handleDoubleClickEdit(e){
+    let row = parseInt(e.target.dataset.row, 10);
+    let col = parseInt(e.target.dataset.column, 10);
+    console.log("e.target:"+e.target)
+    console.log("e.target.dataset:"+e.target.dataset)
+    console.log("e.target.dataset.row:"+e.target.dataset.row + " type: " + typeof(e.target.dataset.row))
+    console.log("e.target.dataset.column:"+e.target.dataset.column +" type: "+ typeof(e.target.dataset.column))
+    console.log("content: "+this.state.data[row][col])
+    console.log("innerText: "+e.target.innerText)
+    console.log("textContent: "+e.target.textContent)
+    // e.target.textContent = 
+    //   <form>
+    //     <input type='text'>{e.target.innerText}</input>
+    //   </form>;
+    this.setState(
+      {
+        edit:{
+          row:row,
+          col:col
+        }
+      }
+    );
+  }
+
+  handleSubmitSave(e){
+    e.preventDefault();
+    console.log("FirstChild Value: "+e.target.firstChild.value)
+    // console.log("innerText: "+e.target.innerText)
+    // console.log("textContent: "+e.target.textContent)
+    let new_data = this.state.data;
+    new_data[this.state.edit.row][this.state.edit.col] = e.target.firstChild.value;
+    this.setState({      
+        data: new_data,
+        edit:{row:null, col:null}
+      });
+
+  }
+
   componentDidMount() {
     console.log('I was triggered during componentDidMount')
   }
@@ -93,7 +129,7 @@ class Excel extends Component{
     return(
       <table>
         {/* <thead onClick={this.onHandleClick}> */}
-        <thead onClick={this.onHandleClick.bind(this, 'Parameter')}>
+        <thead onClick={this.onHandleClickSort}>
           <tr >
             {console.log(this.state.headers)}
             {
@@ -109,14 +145,36 @@ class Excel extends Component{
         </thead>
         <tbody>
           {
-              this.state.data.map((item) => {
+              this.state.data.map((row, rowIdx) => {
+                  
                   return(
-                    <tr key={item.toString()} >
-                      <td>{item[0]}</td>
-                      <td>{item[1]}</td>
-                      <td>{item[2]}</td>
-                      <td>{item[3]}</td>
-                      <td>{item[4]}</td>
+                    <tr key={row.toString()} >
+                      {
+                        row.map((item, colIdx) => {
+                          let isEdit = (this.state.edit.row===rowIdx) && (this.state.edit.col ===colIdx);
+                          return(
+                            <td key={colIdx} data-column={colIdx} data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>
+                              {isEdit?(
+                                  <form onSubmit={this.handleSubmitSave}>
+                                    <input type="text" defaultValue={item}/>
+                                  </form>
+                                ):(
+                                  item
+                                )
+                              }
+                            </td>
+                          );
+                        })
+                      }
+                      
+                      
+                        {/* <td data-column='0' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[0]}</td>
+                        <td data-column='1' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[1]}</td>
+                        <td data-column='2' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[2]}</td>
+                        <td data-column='3' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[3]}</td>
+                        <td data-column='4' data-row={rowIdx} onDoubleClick={this.handleDoubleClickEdit}>{row[4]}</td>  */}
+                      
+                    
                     </tr>
                   );
               })
