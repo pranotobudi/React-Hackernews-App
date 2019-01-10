@@ -3,24 +3,6 @@ import './App.css';
 
 
 
-const list = [
-  {
-  title: 'React',
-  url: 'https://reactjs.org/',
-  author: 'Jordan Walke',
-  num_comments: 3,
-  points: 4,
-  objectID: 0,
-  },
-  {
-  title: 'Redux',
-  url: 'https://redux.js.org/',
-  author: 'Dan Abramov, Andrew Clarkkkk',
-  num_comments: 2,
-  points: 5,
-  objectID: 1,
-  },
-];
 
 class Excel extends Component{
   constructor(props) {
@@ -39,7 +21,7 @@ class Excel extends Component{
     this.handleSubmitSave = this.handleSubmitSave.bind(this);
     this.handleOnChangeSearch = this.handleOnChangeSearch.bind(this);
     this.handleOnClickSearch = this.handleOnClickSearch.bind(this);
-    this.handleOnClickDownload = this.handleOnClickDownload.bind(this, 'json');
+    // this.handleOnClickDownload = this.handleOnClickDownload.bind(this, 'json');
   }
 
   onHandleClickSort(e){
@@ -70,7 +52,7 @@ class Excel extends Component{
         item = item.replace('\u2193','');
 
           if (columnClicked === idx){
-          item += current_ascending?' \u2193':' \u2191'; 
+          item += current_ascending?' \u2193':' \u2191';
           }
         console.log(item + " idx: " + idx)
         return item;
@@ -188,7 +170,7 @@ class Excel extends Component{
     return(
       <div>
       <button onClick={this.handleOnClickSearch}>Search</button>
-      <button onClick={this.handleOnClickDownload}>Download JSON</button>
+      <button onClick={()=>this.handleOnClickDownload('json')}>Download JSON</button>
       </div>
       
     );
@@ -282,55 +264,6 @@ class Excel extends Component{
       <div>
         {this.renderToolbar()}
         {this.renderTable()}
-      </div>
-    );
-  }
-}
-
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      list: list,
-    };
-
-    this.onDismiss = this.onDismiss.bind(this);
-  }
-
-  onDismiss(id) {
-    function isNotId(item) {
-      return item.objectID !== id;
-    }
-      
-    const updatedList = this.state.list.filter(isNotId); //input argument of filter is a function. 
-    this.setState({ list: updatedList });
-  }
-    
-      
-  render() {
-    return (
-      <div className="App">
-        Bismillah
-        Alhamdulillah
-        {this.state.list.map(function(item) {
-          return (
-            <div key={item.objectID}>
-              <span><a href={item.url}>{item.title}</a></span>
-              <span>{item.author}</span>
-              <span>{item.num_comments}</span>
-              <span>{item.points}</span>
-              <span>
-                <button
-                  onClick={() => this.onDismiss(item.objectID)}
-                  type="button"
-                  >
-                  Dismiss
-                </button>
-              </span>
-            </div>
-          );
-        })}
-
       </div>
     );
   }
